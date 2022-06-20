@@ -1,5 +1,6 @@
 package com.flash.pool.util;
 
+import java.lang.reflect.Field;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 
@@ -27,7 +28,15 @@ public class FlashExecutorV3 implements Executor {
         // 直接往队列里放，等着被工作线程们抢
         if (!workQueue.offer(command)) {
             // 如果队列满了，直接抛弃
-            System.out.println("队列满了，直接抛弃");
+            try {
+                Field name = command.getClass().getDeclaredField("name");
+                name.setAccessible(true);
+                String threadName = (String)name.get(command);
+                System.out.println("队列满了，直接抛弃 "+ threadName);
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                e.printStackTrace();
+            }
+
         }
     }
 
