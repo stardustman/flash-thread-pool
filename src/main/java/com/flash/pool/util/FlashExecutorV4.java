@@ -42,7 +42,7 @@ public class FlashExecutorV4 implements Executor {
     @Override
     public void execute(Runnable command) {
         if (workCount.get() < corePoolSize) {
-            // 工作线程数 <= 核心线程时，新建工作线程
+            // 工作线程数 < 核心线程时，新建工作线程
             Worker w = new Worker(command);
             // 增加工作线程数
             workCount.getAndIncrement();
