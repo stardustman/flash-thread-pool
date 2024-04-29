@@ -14,7 +14,7 @@ public class FlashExecutorV2 implements Executor {
 
     public FlashExecutorV2(BlockingQueue<Runnable> workQueue) {
         this.workQueue = workQueue;
-        new Thread(new Worker()).start();
+        new Thread(new Worker(),"打工人线程").start();
     }
 
     @Override

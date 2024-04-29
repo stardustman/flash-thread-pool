@@ -14,12 +14,13 @@ public class FlashExecutorV3 implements Executor {
 
     // 由调用者提供的阻塞队列
     private final BlockingQueue<Runnable> workQueue;
+    private String prefix = "打工人线程-";
 
     public FlashExecutorV3(int corePoolSize, BlockingQueue<Runnable> workQueue) {
         this.workQueue = workQueue;
         // 直接创建 corePoolSize 个线程并启动
         for (int i = 0; i < corePoolSize; i++) {
-            new Thread(new Worker()).start();
+            new Thread(new Worker(),prefix + i).start();
         }
     }
 
@@ -28,15 +29,7 @@ public class FlashExecutorV3 implements Executor {
         // 直接往队列里放，等着被工作线程们抢
         if (!workQueue.offer(command)) {
             // 如果队列满了，直接抛弃
-            try {
-                Field name = command.getClass().getDeclaredField("name");
-                name.setAccessible(true);
-                String threadName = (String)name.get(command);
-                System.out.println("队列满了，直接抛弃 "+ threadName);
-            } catch (NoSuchFieldException | IllegalAccessException e) {
-                e.printStackTrace();
-            }
-
+            System.out.println("队列满了，直接抛弃 "+ command);
         }
     }
 
@@ -63,5 +56,4 @@ public class FlashExecutorV3 implements Executor {
         }
 
     }
-
 }

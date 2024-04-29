@@ -14,6 +14,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * 3. 但当队列已满且仍然 workCount < maximumPoolSize 时，不再直接走拒绝策略，而是创建非核心线程，直到 workCount = maximumPoolSize，再走拒绝策略。
  */
 public class FlashExecutorV5 implements Executor {
+    private String corePrefix = "核心打工线程-";
+    private String tempPrefix = "临时打工线程-";
 
     // 工作线程的数量
     private AtomicInteger workCount = new AtomicInteger(0);
@@ -55,26 +57,31 @@ public class FlashExecutorV5 implements Executor {
     @Override
     public void execute(Runnable command) {
         if (workCount.get() < corePoolSize) {
-            addWorker(command);
+            addWorker(command,true);
             return;
         }
-        if (!workQueue.offer(command)) {
-            if (workCount.get() < maximumPoolSize) {
-                addWorker(command);
+        if (!workQueue.offer(command)) { // 队列已经满了
+            if (workCount.get() < maximumPoolSize) { // 非核心线程数还没有达到
+                addWorker(command,false);
                 return;
             }
-            handler.rejectedExecution(command, this);
+            handler.rejectedExecution(command, this); // 已经达到了 maximumPoolSize
         }
     }
 
-    private void addWorker(Runnable command) {
-        // 工作线程数 <= 核心线程时，新建工作线程
+    private void addWorker(Runnable command, boolean coreThread) {
+        // 工作线程数 < 核心线程时，新建工作线程
         Worker w = new Worker(command);
         // 增加工作线程数
         workCount.getAndIncrement();
         workers.add(w);
         // 并且把它启动
         w.thread.start();
+        if (coreThread){
+            w.thread.setName(corePrefix + workCount.get());
+        } else {
+            w.thread.setName(tempPrefix + workCount.get());
+        }
     }
 
     private final class Worker implements Runnable {

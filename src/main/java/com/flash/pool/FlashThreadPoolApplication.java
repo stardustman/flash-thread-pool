@@ -1,15 +1,12 @@
 package com.flash.pool;
 
 import com.flash.pool.util.FlashExecutorV3;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.util.concurrent.ArrayBlockingQueue;
 
-@SpringBootApplication
 public class FlashThreadPoolApplication {
 
     public static void main(String[] args) throws InterruptedException {
-        //SpringApplication.run(FlashThreadPoolApplication.class, args);
         FlashExecutorV3 flashExecutor = new FlashExecutorV3(2, new ArrayBlockingQueue<>(3));
         flashExecutor.execute(new FlashTask("t1"));
         flashExecutor.execute(new FlashTask("t2"));

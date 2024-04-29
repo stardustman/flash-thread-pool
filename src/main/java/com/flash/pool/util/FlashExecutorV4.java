@@ -14,6 +14,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class FlashExecutorV4 implements Executor {
 
+    private String prefix = "打工人线程-";
+
     // 工作线程的数量
     private AtomicInteger workCount = new AtomicInteger(0);
     // 存放工作线程 Worker 的引用
@@ -66,6 +68,7 @@ public class FlashExecutorV4 implements Executor {
         Worker(Runnable firstTask) {
             this.task = firstTask;
             this.thread = threadFactory.newThread(this);
+            this.thread.setName(prefix + workCount.get());
         }
 
         // 死循环从队列里读任务，然后运行任务
